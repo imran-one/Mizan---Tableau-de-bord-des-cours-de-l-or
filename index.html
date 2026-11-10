@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mizan – Cours de l'or et de l'argent</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+ 
+  <header class="topbar">
+    <div>
+      <h1>Mizan</h1>
+      <p class="subtitle">Bijouterie Al Andalous · Nador</p>
+    </div>
+    <div class="controls">
+      <label for="currency-select">Devise</label>
+      <select id="currency-select">
+        <option value="MAD">MAD</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <button id="refresh-btn" type="button">Actualiser</button>
+    </div>
+  </header>
+ 
+  <main>
+ 
+    <!-- Etat de la requete : chargement / erreur -->
+    <section id="status" class="status" aria-live="polite" hidden>
+      <p id="status-message"></p>
+      <button id="retry-btn" type="button" hidden>Réessayer</button>
+    </section>
+ 
+    <!-- US-01 / US-02 : cartes de prix -->
+    <section aria-labelledby="prices-title">
+      <h2 id="prices-title">Prix du jour</h2>
+      <p id="last-update" class="muted"></p>
+      <div id="cards" class="cards"></div>
+    </section>
+ 
+    <!-- US-04 : historique -->
+    <section aria-labelledby="history-title">
+      <h2 id="history-title">Historique</h2>
+      <div class="controls">
+        <label for="history-metal">Métal</label>
+        <select id="history-metal"></select>
+        <label for="history-period">Période</label>
+        <select id="history-period">
+          <option value="7">7 jours</option>
+          <option value="30">30 jours</option>
+        </select>
+      </div>
+      <div id="chart" class="chart"></div>
+    </section>
+ 
+    <!-- US-05 : estimateur de bijou -->
+    <section aria-labelledby="estimator-title">
+      <h2 id="estimator-title">Estimer un bijou</h2>
+      <div class="estimator">
+        <div class="field">
+          <label for="weight-input">Poids (grammes)</label>
+          <input id="weight-input" type="text" inputmode="decimal" autocomplete="off">
+          <p id="weight-error" class="error-text"></p>
+        </div>
+        <div class="field">
+          <label for="estimator-metal">Métal</label>
+          <select id="estimator-metal"></select>
+        </div>
+        <p id="estimate-result" class="estimate-result"></p>
+      </div>
+    </section>
+ 
+    <!-- US-07 (bonus) : journal des requetes -->
+    <details class="log">
+      <summary>Journal des requêtes</summary>
+      <ul id="log-list"></ul>
+    </details>
+ 
+  </main>
+ 
+  <!-- Modele de carte : a cloner en JS, puis remplir avec textContent -->
+  <template id="card-template">
+    <article class="card">
+      <h3 class="card-metal"></h3>
+      <p class="card-price"></p>
+      <p class="card-change"><span class="card-arrow"></span> <span class="card-delta"></span></p>
+      <p class="card-time muted"></p>
+    </article>
+  </template>
+ 
+</body>
+</html>
