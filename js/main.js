@@ -1,6 +1,6 @@
 import { fetchSpot, fetchHistory } from "./api.js";
 import { computeChange } from "./change.js";
-
+import { estimateValue, parseWeight } from "./estimator.js";
 const status = document.getElementById("status");
 const statusMessage = document.getElementById("status-message");
 const retryButton = document.getElementById("retry-btn");
@@ -13,9 +13,39 @@ const savedCurrency = localStorage.getItem("currency");
 if (savedCurrency) {
   currencySelect.value = savedCurrency;
 }
+const estimatorMetal = document.getElementById("estimator-metal");
+const weightInput = document.getElementById("weight-input");
+const weightError = document.getElementById("weight-error");
+const estimateResult = document.getElementById("estimate-result");
+
+let currentMetals = [];
+let currentCurrency = "";
+
+function updateEstimate() {
+  const result = parseWeight(weightInput.value);
+
+  if (!result.valid) {
+    weightError.textContent = result.message;
+    estimateResult.textContent = "";
+    return;
+  }
+
+  weightError.textContent = "";
+  const metal = currentMetals.find(
+    (m) => m.chartSymbol === estimatorMetal.value,
+  );
+  if (!metal) {
+    return;
+  }
+
+  const value = estimateValue(result.value, metal.price);
+  estimateResult.textContent =
+    "Valeur estimée : " + value.toFixed(2) + " " + currentCurrency;
+}
 
 async function loadPrices() {
   const currency = currencySelect.value;
+  currentCurrency = currency;
 
   status.hidden = false;
   retryButton.hidden = true;
@@ -35,6 +65,20 @@ async function loadPrices() {
         price: (data.silver_usd_oz / 31.1035) * data.fx_rate,
       },
     ];
+    currentMetals = metals;
+    const selectedMetal = estimatorMetal.value;
+    estimatorMetal.replaceChildren();
+
+    for (const metal of metals) {
+      const option = document.createElement("option");
+      option.value = metal.chartSymbol;
+      option.textContent = metal.name;
+      estimatorMetal.append(option);
+    }
+
+    if (selectedMetal) {
+      estimatorMetal.value = selectedMetal;
+    }
 
     cards.replaceChildren();
     for (const metal of metals) {
@@ -62,6 +106,9 @@ async function loadPrices() {
     lastUpdate.textContent =
       "Dernière mise à jour : " +
       new Date(data.updated_at).toLocaleString("fr-FR");
+    if (weightInput.value !== "") {
+      updateEstimate();
+    }
   } catch (error) {
     statusMessage.textContent = error.message;
     retryButton.hidden = false;
@@ -77,5 +124,6 @@ currencySelect.addEventListener("change", () => {
   localStorage.setItem("currency", currencySelect.value);
   loadPrices();
 });
-
+weightInput.addEventListener("input", updateEstimate);
+estimatorMetal.addEventListener("change", updateEstimate);
 loadPrices();
