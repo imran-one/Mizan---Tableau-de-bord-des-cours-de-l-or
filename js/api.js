@@ -31,3 +31,9 @@ class ApiError extends Error {
     this.kind = kind;
   }
 }
+
+export async function fetchHistory(chartSymbol) {
+  const response = await fetch(`https://xaus.com/api/v1/chart?symbol=${chartSymbol}&range=1mo&interval=1d`);
+  const data = await response.json();
+  return data.points;
+}

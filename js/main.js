@@ -1,4 +1,5 @@
-import { fetchSpot } from "./api.js";
+import { fetchSpot, fetchHistory } from "./api.js";
+import { computeChange } from "./change.js";
 
 const status = document.getElementById("status");
 const statusMessage = document.getElementById("status-message");
@@ -27,8 +28,12 @@ async function loadPrices() {
     status.hidden = true;
 
     const metals = [
-      { name: "Or", price: data.xau.price },
-      { name: "Argent", price: (data.silver_usd_oz / 31.1035) * data.fx_rate },
+      { name: "Or", chartSymbol: "xau", price: data.xau.price },
+      {
+        name: "Argent",
+        chartSymbol: "silver",
+        price: (data.silver_usd_oz / 31.1035) * data.fx_rate,
+      },
     ];
 
     cards.replaceChildren();
@@ -37,6 +42,20 @@ async function loadPrices() {
       card.querySelector(".card-metal").textContent = metal.name;
       card.querySelector(".card-price").textContent =
         metal.price.toFixed(2) + " " + currency;
+      const points = await fetchHistory(metal.chartSymbol);
+      const change = computeChange(points);
+      const deltaValue = (change.delta / 31.1035) * data.fx_rate;
+      const isUp = change.delta >= 0;
+
+      card.querySelector(".card-arrow").textContent = isUp ? "▲" : "▼";
+      card.querySelector(".card-delta").textContent =
+        deltaValue.toFixed(2) +
+        " " +
+        currency +
+        " (" +
+        change.percent.toFixed(2) +
+        " %)";
+      card.querySelector(".card").classList.add(isUp ? "is-up" : "is-down");
       cards.append(card);
     }
 
