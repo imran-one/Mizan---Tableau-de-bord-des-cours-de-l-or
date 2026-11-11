@@ -8,6 +8,10 @@ const cards = document.getElementById("cards");
 const template = document.getElementById("card-template");
 const lastUpdate = document.getElementById("last-update");
 const currencySelect = document.getElementById("currency-select");
+const savedCurrency = localStorage.getItem("currency");
+if (savedCurrency) {
+  currencySelect.value = savedCurrency;
+}
 
 async function loadPrices() {
   const currency = currencySelect.value;
@@ -50,6 +54,9 @@ async function loadPrices() {
 
 refreshButton.addEventListener("click", loadPrices);
 retryButton.addEventListener("click", loadPrices);
-currencySelect.addEventListener("change", loadPrices);
+currencySelect.addEventListener("change", () => {
+  localStorage.setItem("currency", currencySelect.value);
+  loadPrices();
+});
 
 loadPrices();
