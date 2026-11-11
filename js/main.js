@@ -7,15 +7,19 @@ const refreshButton = document.getElementById("refresh-btn");
 const cards = document.getElementById("cards");
 const template = document.getElementById("card-template");
 const lastUpdate = document.getElementById("last-update");
+const currencySelect = document.getElementById("currency-select");
 
 async function loadPrices() {
+  const currency = currencySelect.value;
+
   status.hidden = false;
   retryButton.hidden = true;
   statusMessage.textContent = "Chargement des prix…";
   refreshButton.disabled = true;
   retryButton.disabled = true;
+
   try {
-    const data = await fetchSpot();
+    const data = await fetchSpot(currency);
     status.hidden = true;
 
     const metals = [
@@ -28,7 +32,7 @@ async function loadPrices() {
       const card = template.content.cloneNode(true);
       card.querySelector(".card-metal").textContent = metal.name;
       card.querySelector(".card-price").textContent =
-        metal.price.toFixed(2) + " MAD";
+        metal.price.toFixed(2) + " " + currency;
       cards.append(card);
     }
 
@@ -36,7 +40,7 @@ async function loadPrices() {
       "Dernière mise à jour : " +
       new Date(data.updated_at).toLocaleString("fr-FR");
   } catch (error) {
-    statusMessage.textContent = "Impossible de charger les prix.";
+    statusMessage.textContent = error.message;
     retryButton.hidden = false;
   } finally {
     refreshButton.disabled = false;
@@ -46,5 +50,6 @@ async function loadPrices() {
 
 refreshButton.addEventListener("click", loadPrices);
 retryButton.addEventListener("click", loadPrices);
+currencySelect.addEventListener("change", loadPrices);
 
 loadPrices();
