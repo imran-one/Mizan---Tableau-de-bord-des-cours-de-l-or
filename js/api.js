@@ -21,7 +21,9 @@ export async function fetchSpot(currency) {
       "Erreur du serveur (code " + response.status + ").",
     );
   }
-
+  if (!response.ok) {
+  throw new Error("Erreur du serveur (code " + response.status + ").");
+}
   return await response.json();
 }
 
@@ -34,6 +36,9 @@ class ApiError extends Error {
 
 export async function fetchHistory(chartSymbol) {
   const response = await fetch(`https://xaus.com/api/v1/chart?symbol=${chartSymbol}&range=1mo&interval=1d`);
+  if (!response.ok) {
+  throw new Error("Erreur du serveur (code " + response.status + ").");
+}
   const data = await response.json();
   return data.points;
 }

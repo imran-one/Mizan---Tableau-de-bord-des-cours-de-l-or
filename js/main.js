@@ -147,10 +147,16 @@ weightInput.addEventListener("input", updateEstimate);
 estimatorMetal.addEventListener("change", updateEstimate);
 
 async function loadHistory() {
+chartStatus.textContent = "Chargement de l'historique…";
+  try{
   const points = await fetchHistory(historyMetal.value);
   const days = Number(historyPeriod.value);
   const shown = points.slice(-days);
   renderChart(shown);
+  }catch (error){
+    chart.replaceChildren();
+    chartStatus.textContent = "Impossible de charger l'historique.";
+  }
 }
 
 function renderChart(points) {
