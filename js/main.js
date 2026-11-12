@@ -17,6 +17,10 @@ const estimatorMetal = document.getElementById("estimator-metal");
 const weightInput = document.getElementById("weight-input");
 const weightError = document.getElementById("weight-error");
 const estimateResult = document.getElementById("estimate-result");
+const historyMetal = document.getElementById("history-metal");
+const historyPeriod = document.getElementById("history-period");
+const chart = document.getElementById("chart");
+const chartStatus = document.getElementById("chart-status");
 
 let currentMetals = [];
 let currentCurrency = "";
@@ -80,6 +84,20 @@ async function loadPrices() {
       estimatorMetal.value = selectedMetal;
     }
 
+    const selectedHistoryMetal = historyMetal.value;
+    historyMetal.replaceChildren();
+
+    for (const metal of metals) {
+      const option = document.createElement("option");
+      option.value = metal.chartSymbol;
+      option.textContent = metal.name;
+      historyMetal.append(option);
+    }
+
+    if (selectedHistoryMetal) {
+      historyMetal.value = selectedHistoryMetal;
+    }
+
     cards.replaceChildren();
     for (const metal of metals) {
       const card = template.content.cloneNode(true);
@@ -124,6 +142,39 @@ currencySelect.addEventListener("change", () => {
   localStorage.setItem("currency", currencySelect.value);
   loadPrices();
 });
+
 weightInput.addEventListener("input", updateEstimate);
 estimatorMetal.addEventListener("change", updateEstimate);
+
+async function loadHistory() {
+  const points = await fetchHistory(historyMetal.value);
+  const days = Number(historyPeriod.value);
+  const shown = points.slice(-days);
+  renderChart(shown);
+}
+
+function renderChart(points) {
+  chart.replaceChildren();
+  if (points.length === 0) {
+    chartStatus.textContent = "Aucune donnée d'historique.";
+    return;
+  }
+  chartStatus.textContent = `${points.length} points affichés.`;
+
+  const value = points.map((point) => point.c);
+  const MAX = Math.max(...value);
+  const MIN = Math.min(...value);
+
+  for (const point of points) {
+    const bar = document.createElement("div");
+    bar.className = "chart-bar";
+    const a = (point.c-MIN)/(MAX-MIN);
+    bar.style.height = 10 + a*90 + "%";
+    chart.append(bar);
+  }
+}
+
+historyMetal.addEventListener("change", loadHistory);
+historyPeriod.addEventListener("change", loadHistory);
+loadHistory();
 loadPrices();
