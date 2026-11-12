@@ -155,7 +155,7 @@ chartStatus.textContent = "Chargement de l'historique…";
   renderChart(shown);
   }catch (error){
     chart.replaceChildren();
-    chartStatus.textContent = "Impossible de charger l'historique.";
+    chartStatus.textContent = error.message;
   }
 }
 
