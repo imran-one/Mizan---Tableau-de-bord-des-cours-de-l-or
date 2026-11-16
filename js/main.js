@@ -52,6 +52,7 @@ async function loadPrices() {
   currentCurrency = currency;
 
   status.hidden = false;
+  status.className = "status is-loading";
   retryButton.hidden = true;
   statusMessage.textContent = "Chargement des prix…";
   refreshButton.disabled = true;
@@ -131,6 +132,7 @@ async function loadPrices() {
       updateEstimate();
     }
   } catch (error) {
+    status.className = "status is-error";
     statusMessage.textContent = error.message;
 
     retryButton.hidden = false;
