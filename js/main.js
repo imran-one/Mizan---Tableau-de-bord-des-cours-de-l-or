@@ -97,6 +97,9 @@ async function loadPrices() {
     if (selectedHistoryMetal) {
       historyMetal.value = selectedHistoryMetal;
     }
+    if (chart.childElementCount === 0) {
+      loadHistory();
+    }
 
     cards.replaceChildren();
     for (const metal of metals) {
@@ -129,6 +132,7 @@ async function loadPrices() {
     }
   } catch (error) {
     statusMessage.textContent = error.message;
+
     retryButton.hidden = false;
   } finally {
     refreshButton.disabled = false;
@@ -147,13 +151,13 @@ weightInput.addEventListener("input", updateEstimate);
 estimatorMetal.addEventListener("change", updateEstimate);
 
 async function loadHistory() {
-chartStatus.textContent = "Chargement de l'historique…";
-  try{
-  const points = await fetchHistory(historyMetal.value);
-  const days = Number(historyPeriod.value);
-  const shown = points.slice(-days);
-  renderChart(shown);
-  }catch (error){
+  chartStatus.textContent = "Chargement de l'historique…";
+  try {
+    const points = await fetchHistory(historyMetal.value);
+    const days = Number(historyPeriod.value);
+    const shown = points.slice(-days);
+    renderChart(shown);
+  } catch (error) {
     chart.replaceChildren();
     chartStatus.textContent = error.message;
   }
@@ -174,13 +178,12 @@ function renderChart(points) {
   for (const point of points) {
     const bar = document.createElement("div");
     bar.className = "chart-bar";
-    const a = (point.c-MIN)/(MAX-MIN);
-    bar.style.height = 10 + a*90 + "%";
+    const a = (point.c - MIN) / (MAX - MIN);
+    bar.style.height = 10 + a * 90 + "%";
     chart.append(bar);
   }
 }
 
 historyMetal.addEventListener("change", loadHistory);
 historyPeriod.addEventListener("change", loadHistory);
-loadHistory();
 loadPrices();
